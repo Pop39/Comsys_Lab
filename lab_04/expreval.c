@@ -3,10 +3,11 @@
 #include	<assert.h>
 
 #define _PRINT_DATA_ALL_FUNCTION_
+//#define _PRINT_RECEIVED_
 
 static FILE *f;
 static int ch;
-static unsigned int val;
+static int val;
 enum { plus, minus, times, divide, mod, lparen, rparen, number, eof, illegal};
 static int sym;
 
@@ -29,9 +30,6 @@ static void Number(){
 		val = val * 10 + ch - '0';
 		ch = getc( f );
 	}
-#ifdef _PRINT_DATA_ALL_FUNCTION_
-	printf("Function number val is %5d\n" , val );
-#endif
 }
 
 // This function we determine type of data in case that is number will collect in val
@@ -55,7 +53,7 @@ static int SGet(){
 		default  : sym = illegal;
 	}
 	
-	#ifdef _PRINT_DATA_ALL_FUNCTION_
+	#ifdef _PRINT_RECEIVED_
 		printf("Function SGet ch  is   : %5d\n" , ch );
 		printf("Function SGet sym is   : %5d\n" , sym );		
 	#endif
@@ -74,12 +72,38 @@ static void Expr(){
 	}
 
 	Term();
-	int old_val = val * type_number;
+	val = val * type_number;
 
+	int old_val , old_sym ;
 	while( ( sym == plus ) || ( sym == minus ) ){
+		old_sym = sym;
+		old_val = val;
 		sym = SGet();
 		Term();
+		if( old_sym == plus ){
+			#ifdef _PRINT_DATA_ALL_FUNCTION_
+				printf("Expression Function old_val is %5d\n" , old_val );
+				printf("Expression Function val is %5d\n" , val );
+			#endif
+			val = old_val + val;
+			#ifdef _PRINT_DATA_ALL_FUNCTION_
+				printf("Expression Function result val is %5d\n" , val );
+			#endif
+		}
+		else{
+			#ifdef _PRINT_DATA_ALL_FUNCTION_
+				printf("Expression Function old_val is %5d\n" , old_val );
+				printf("Expression Function val is %5d\n" , val );
+			#endif
+			val = old_val - val;
+			#ifdef _PRINT_DATA_ALL_FUNCTION_
+				printf("Expression Function result val is %5d\n" , val );
+			#endif
+		}
 	}
+	#ifdef _PRINT_DATA_ALL_FUNCTION_
+		printf("\nRESULT EXPRESSION is val %5d\n\n" , val );
+	#endif
 }
 
 // Function assert use to aborted program when argument is 0
@@ -89,7 +113,7 @@ static void Factor(){
 	if( sym == number ){
 		sym = SGet();
 		#ifdef _PRINT_DATA_ALL_FUNCTION_
-			printf("Factor Function result val is %5d" , val );
+			printf("Factor Function result val is %5d\n" , val );
 		#endif
 	}
 	else{
@@ -105,37 +129,37 @@ static void Term(){
 	int old_val , old_sym;
 	while( ( sym == times ) || ( sym == divide ) || (sym == mod ) ){
 		old_val = val;
-		old_sim = sym;
+		old_sym = sym;
 		sym = SGet();
 		Factor();
-		if( old_sym == time ){
+		if( old_sym == times ){
 			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Factor Function old_val is %5d" , old_val );
-				printf("Factor Function val is %5d" , val );
+				printf("Term Function old_val is %5d\n" , old_val );
+				printf("Term Function val is %5d\n" , val );
 			#endif
 			val = old_val * val;
 			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Factor Function result val is %5d" , val );
+				printf("Term Function times val is %5d\n" , val );
 			#endif
 		}
 		else if( old_sym == divide ){
 			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Factor Function old_val is %5d" , old_val );
-				printf("Factor Function val is %5d" , val );
+				printf("Term Function old_val is %5d\n" , old_val );
+				printf("Term Function val is %5d\n" , val );
 			#endif
 			val = old_val / val;
 			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Factor Function result val is %5d" , val );
+				printf("Term Function divide val is %5d\n" , val );
 			#endif
 		}
 		else{
 			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Factor Function old_val is %5d" , old_val );
-				printf("Factor Function val is %5d" , val );
+				printf("Term Function old_val is %5d\n" , old_val );
+				printf("Term Function val is %5d\n" , val );
 			#endif
 			val = old_val % val;
 			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Factor Function result val is %5d" , val );
+				printf("Term Function mod val is %5d\n" , val );
 			#endif
 		}
 	}
