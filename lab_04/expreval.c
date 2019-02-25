@@ -2,7 +2,7 @@
 #include	<stdio.h>
 #include	<assert.h>
 
-#define _PRINT_DATA_ALL_FUNCTION_
+//#define _PRINT_DATA_ALL_FUNCTION_
 //#define _PRINT_RECEIVED_
 
 static FILE *f;
@@ -82,22 +82,22 @@ static void Expr(){
 		Term();
 		if( old_sym == plus ){
 			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Expression Function old_val is %5d\n" , old_val );
+				printf("\nExpression Function old_val is %5d\n" , old_val );
 				printf("Expression Function val is %5d\n" , val );
 			#endif
 			val = old_val + val;
 			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Expression Function result val is %5d\n" , val );
+				printf("Expression Function plus val is %5d\n" , val );
 			#endif
 		}
 		else{
 			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Expression Function old_val is %5d\n" , old_val );
+				printf("\nExpression Function old_val is %5d\n" , old_val );
 				printf("Expression Function val is %5d\n" , val );
 			#endif
 			val = old_val - val;
 			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Expression Function result val is %5d\n" , val );
+				printf("Expression Function divide val is %5d\n" , val );
 			#endif
 		}
 	}
@@ -134,7 +134,7 @@ static void Term(){
 		Factor();
 		if( old_sym == times ){
 			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Term Function old_val is %5d\n" , old_val );
+				printf("\nTerm Function old_val is %5d\n" , old_val );
 				printf("Term Function val is %5d\n" , val );
 			#endif
 			val = old_val * val;
@@ -144,7 +144,7 @@ static void Term(){
 		}
 		else if( old_sym == divide ){
 			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Term Function old_val is %5d\n" , old_val );
+				printf("\nTerm Function old_val is %5d\n" , old_val );
 				printf("Term Function val is %5d\n" , val );
 			#endif
 			val = old_val / val;
@@ -154,7 +154,7 @@ static void Term(){
 		}
 		else{
 			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Term Function old_val is %5d\n" , old_val );
+				printf("\nTerm Function old_val is %5d\n" , old_val );
 				printf("Term Function val is %5d\n" , val );
 			#endif
 			val = old_val % val;
@@ -168,8 +168,8 @@ static void Term(){
 int main( int argc , char* argv[] ){
 	register int result;
 
-	printf("Argument argc is %d\n" , argc );
-	printf("Argument argv is %s\n" , argv[1] );
+//	printf("Argument argc is %d\n" , argc );
+//	printf("Argument argv is %s\n" , argv[1] );
 	
 	if( argc == 2 ){
 		SInit( argv[1] );
