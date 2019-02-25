@@ -175,7 +175,6 @@ int main( int argc , char* argv[] ){
 		SInit( argv[1] );
 		sym = SGet();
 		Expr();
-		printf( "Result of expression is %d\n" , val);
 		assert( sym == eof );
 	}
 	else{
