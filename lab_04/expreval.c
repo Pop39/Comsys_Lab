@@ -70,14 +70,14 @@ static void Expr(){
 
 // Function assert use to aborted program when argument is 0
 static void Factor(){
-	assert( ( sym == number ) || ( sym == lparem ) );
+	assert( ( sym == number ) || ( sym == lparen ) );
 	if( sym == number ){
 		sym = SGet();
 	}
 	else{
 		sym = SGet();
 		Expr();
-		assert( sym == rparem );
+		assert( sym == rparen );
 		sym = SGet();
 	}
 }
@@ -92,9 +92,12 @@ static void Term(){
 
 int main( int argc , char* argv[] ){
 	register int result;
+
+	printf("Argument argc is %d\n" , argc );
+	printf("Argument argv is %s\n" , argv[1] );
 	
 	if( argc == 2 ){
-		SInit( argv[] );
+		SInit( argv[1] );
 		sym = SGet();
 		Expr();
 		assert( sym == eof );
