@@ -1,7 +1,6 @@
 #include	<stdlib.h>
 #include	<stdio.h>
 #include	<assert.h>
-
 //#define _PRINT_DATA_ALL_FUNCTION_
 //#define _PRINT_RECEIVED_
 
@@ -14,6 +13,14 @@ static int sym;
 static void Expr();
 static void Factor();
 static void Term();
+
+typedef struct NodesDesc *Node;
+
+typedef struct NodeDesc{
+	char kind;			// plus , minus , times , divide , number
+	int val;			// nummber: value
+	Node left, right;	// plus, mins times, divde: children
+} NodeDesc;
 
 // This function use for readfile into variable f
 static void SInit( char* filename ){ 
@@ -47,7 +54,6 @@ static int SGet(){
 		case '%' : sym = mod; ch = getc(f); break;
 		case '(' : sym = lparen; ch = getc(f); break;
 		case ')' : sym = rparen; ch = getc(f); break;
-
 		case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : 
 		case '8' : case '9' : sym = number; break;
 		default  : sym = illegal;
