@@ -1,190 +1,239 @@
 #include	<stdlib.h>
+
 #include	<stdio.h>
+
 #include	<assert.h>
-//#define _PRINT_DATA_ALL_FUNCTION_
-//#define _PRINT_RECEIVED_
 
-static FILE *f;
+//#define _PRINT_TERM_
+//#define _PRINT_FACTOR_
+//#define _PRINT_NUMBER_
+//#define _PRINT_EXPRESSION_
+#define _PRINT_DEBUG_PRINT_
+
+
+static FILE *file;
 static int ch;
-static int val;
-enum { plus, minus, times, divide, mod, lparen, rparen, number, eof, illegal};
-static int sym;
+static unsigned int val;
+enum { plus , minus , times , divide , mod , lparen , rparen , number , eof , illegal };
+static int symbol;
 
-static void Expr();
-static void Factor();
-static void Term();
-
-typedef struct NodesDesc *Node;
-
+// Declare structure of tree
+typedef struct NodeDesc* Node;
 typedef struct NodeDesc{
-	char kind;			// plus , minus , times , divide , number
-	int val;			// nummber: value
-	Node left, right;	// plus, mins times, divde: children
+	int kind;	// plus , minus , times , dive , number
+	int val;	// in case is number, value
+	Node left;  // plus , minus , times , divide
+	Node right; // plus , minus , times, divide
 } NodeDesc;
 
-// This function use for readfile into variable f
-static void SInit( char* filename ){ 
-	ch = EOF;
-	f = fopen( filename , "r+t" ); // open text file for reading and writing
-	if( f!= NULL ) ch = getc(f); 
-	// function getc is get character from stream in this situation stream file is f variable
-}
+// Thid function will use together by using global variable please carefull to use that
+static void SInit( char* file_name ); // for inint file open by save file variable to FILE line7
 
-// This function use for get value of number
-static void Number(){
-	val = 0;
-	while( ('0' <= ch ) && ( ch <= '9' ) ){
-		val = val * 10 + ch - '0';
-		ch = getc( f );
-	}
-}
+static void Number(); // for get value of realnumber into val (global variable)
 
-// This function we determine type of data in case that is number will collect in val
-static int SGet(){
-	register int sym;
+static int SGet( ); // for get type of that char by using enum in line 10 to identify
 
-	while( (ch != EOF ) && ( ch <= ' ' ) ) ch = getc(f);
+static int Factor( Node node , int sign ); 
 
-	switch( ch ){
-		case EOF : sym = eof; break;
-		case '+' : sym = plus; ch = getc(f); break;
-		case '-' : sym = minus; ch = getc(f); break;
-		case '*' : sym = times; ch = getc(f); break;
-		case '/' : sym = divide; ch = getc(f); break;
-		case '%' : sym = mod; ch = getc(f); break;
-		case '(' : sym = lparen; ch = getc(f); break;
-		case ')' : sym = rparen; ch = getc(f); break;
-		case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : 
-		case '8' : case '9' : sym = number; break;
-		default  : sym = illegal;
-	}
-	
-	#ifdef _PRINT_RECEIVED_
-		printf("Function SGet ch  is   : %5d\n" , ch );
-		printf("Function SGet sym is   : %5d\n" , sym );		
-	#endif
+static int Term( Node node , int sign );
 
-	if( sym == number ) Number();
-	
-	return sym;
-}
+static int Expression( Node node );
 
-// This function is expression
-static void Expr(){
-	int type_number = 1;
-	if( (sym == minus ) || (sym == plus) ){
-		if( sym == minus ) type_number = -1;
-		sym = SGet();
-	}
+static void Print( Node root , int level );
 
-	Term();
-	val = val * type_number;
+int main( int argc , char** argv ){
 
-	int old_val , old_sym ;
-	while( ( sym == plus ) || ( sym == minus ) ){
-		old_sym = sym;
-		old_val = val;
-		sym = SGet();
-		Term();
-		if( old_sym == plus ){
-			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("\nExpression Function old_val is %5d\n" , old_val );
-				printf("Expression Function val is %5d\n" , val );
-			#endif
-			val = old_val + val;
-			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Expression Function plus val is %5d\n" , val );
-			#endif
-		}
-		else{
-			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("\nExpression Function old_val is %5d\n" , old_val );
-				printf("Expression Function val is %5d\n" , val );
-			#endif
-			val = old_val - val;
-			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Expression Function divide val is %5d\n" , val );
-			#endif
-		}
-	}
-	#ifdef _PRINT_DATA_ALL_FUNCTION_
-		printf("\nRESULT EXPRESSION is val %5d\n\n" , val );
-	#endif
-}
+	Node node = ( Node ) malloc( sizeof( NodeDesc ) );
 
-// Function assert use to aborted program when argument is 0
-static void Factor(){
-	int old_val;
-	assert( ( sym == number ) || ( sym == lparen ) );
-	if( sym == number ){
-		sym = SGet();
-		#ifdef _PRINT_DATA_ALL_FUNCTION_
-			printf("Factor Function result val is %5d\n" , val );
-		#endif
-	}
-	else{
-		sym = SGet();
-		Expr();
-		assert( sym == rparen );
-		sym = SGet();
-	}
-}
-
-static void Term(){
-	Factor();
-	int old_val , old_sym;
-	while( ( sym == times ) || ( sym == divide ) || (sym == mod ) ){
-		old_val = val;
-		old_sym = sym;
-		sym = SGet();
-		Factor();
-		if( old_sym == times ){
-			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("\nTerm Function old_val is %5d\n" , old_val );
-				printf("Term Function val is %5d\n" , val );
-			#endif
-			val = old_val * val;
-			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Term Function times val is %5d\n" , val );
-			#endif
-		}
-		else if( old_sym == divide ){
-			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("\nTerm Function old_val is %5d\n" , old_val );
-				printf("Term Function val is %5d\n" , val );
-			#endif
-			val = old_val / val;
-			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Term Function divide val is %5d\n" , val );
-			#endif
-		}
-		else{
-			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("\nTerm Function old_val is %5d\n" , old_val );
-				printf("Term Function val is %5d\n" , val );
-			#endif
-			val = old_val % val;
-			#ifdef _PRINT_DATA_ALL_FUNCTION_
-				printf("Term Function mod val is %5d\n" , val );
-			#endif
-		}
-	}
-}
-
-int main( int argc , char* argv[] ){
-	register int result;
-
-//	printf("Argument argc is %d\n" , argc );
-//	printf("Argument argv is %s\n" , argv[1] );
-	
 	if( argc == 2 ){
 		SInit( argv[1] );
-		sym = SGet();
-		Expr();
-		assert( sym == eof );
+		symbol = SGet();
+		int result = Expression( node );
+		assert( symbol == eof );
+		printf( "Result of expression is %d\n" , result );
+		Print( node , 0);
 	}
 	else{
-		printf("usage : expreval <filenam>\n");
+		printf( "Usage : expreval_new <file_name>\n");
+	}	
+}
+
+static void SInit( char* file_name ){
+	ch = EOF;
+	file = fopen( file_name , "r+t" ); // open text file for reading and writing
+	if( file != NULL ) ch = getc( file );
+	// function getc is get character from stream in this situation stream file is file variable
+}
+
+static void Number(){
+	val = 0;
+	while( ( '0' <= ch ) && ( ch <= '9' ) ){ // this use term of ascii code
+		val = val * 10 + ch - '0';
+		ch = getc( file );
 	}
-	return 0;
+	#ifdef _PRINT_NUMBER_
+		printf("Number val is %d\n" , val );
+	#endif
+}
+
+static int SGet(){
+	register int sym; // introduce complier to save this variable into register
+	while( ( ch != EOF ) && ( ch <= ' ' ) ) ch = getc( file ); // less that is space in special
+
+	switch( ch ){
+		case EOF : symbol = eof;	break;
+		case '+' : symbol = plus;	ch = getc(file); break;
+		case '-' : symbol = minus;	ch = getc(file); break;
+		case '*' : symbol = times;	ch = getc(file); break;
+		case '/' : symbol = divide; ch = getc(file); break;
+		case '%' : symbol = mod;	ch = getc(file); break;
+		case '(' : symbol = lparen;	ch = getc(file); break;
+		case ')' : symbol = rparen; ch = getc(file); break;
+
+		case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : 
+		case '8' : case '9' : symbol = number; break;
+		default  : symbol = illegal;
+	}
+
+	if( symbol == number ) Number(); 
+	// this pattern we give you have symbol is number and value in val
+
+	return symbol;
+}
+
+static int Factor( Node node , int sign ){
+
+	assert( ( symbol == number ) || ( symbol == lparen ) );
+	if( symbol == number ){
+		symbol = SGet(); // don't worry if you care to lose old or current value
+		#ifdef _PRINT_FACTOR_
+			printf("Factor will return %d\n" , val );
+		#endif
+		node->kind = number;
+		node->val = number * sign;
+		return val;
+	}
+	else{
+		symbol = SGet();
+		int result = Expression( node );
+		assert( symbol == rparen ); // Check that have close tuple or not
+		symbol = SGet();
+		#ifdef _PRINT_FACTOR_
+			printf("Factor will return %d\n" , result );
+		#endif
+		return result;
+	}
+
+}
+
+static int Term( Node node , int sign ){
+
+	int result = Factor( node , sign );
+	#ifdef _PRINT_TERM_
+		printf("Result before in Term : %d\n" , result );
+	#endif
+	int temp_value;
+	Node new_node;
+	while( 1 ){
+		switch( symbol ){
+			case times	:	symbol = SGet();
+							new_node = ( Node ) malloc( sizeof(NodeDesc) );
+							new_node->kind = times;
+							new_node->left = node;
+							node = new_node;
+							temp_value = Factor( node->right , sign );
+							result *= temp_value;
+							#ifdef _PRINT_TERM_
+								printf( "Multiple Case     : %10d" , result );
+							#endif
+							continue;
+			case divide	:	symbol = SGet();
+							new_node = ( Node ) malloc( sizeof(NodeDesc) );
+							new_node->kind = divide;
+							new_node->left = node;
+							node = new_node;
+							temp_value = Factor( node->right , sign );
+							result /= temp_value;
+							#ifdef _PRINT_TERM_
+								printf( "Divider Case      : %10d" , result );
+							#endif
+							continue;
+			case mod	:	symbol = SGet();
+							new_node = ( Node ) malloc( sizeof(NodeDesc) );
+							new_node->kind = mod;
+							new_node->left = node;
+							node = new_node;
+							temp_value = Factor( node->right , sign );
+							result %= temp_value;
+							#ifdef _PRINT_TERM_
+								printf( "Modulation Case   : %10d" , result );
+							#endif
+							continue;
+		}
+		break;
+	}
+	#ifdef _PRINT_TERM_
+		printf("Result after in Term : %d\n" , result );
+	#endif
+	return result;
+}
+
+static int Expression( Node node ){
+
+	int sign_of_number = 1;
+	switch( symbol ){
+		case minus	: sign_of_number = -1;
+		case plus	: symbol = SGet();
+	}
+
+	int result = Term( node , sign_of_number )*sign_of_number ;
+	#ifdef _PRINT_EXPRESSION_
+		printf("Result before in loop %d\n" , result );
+	#endif
+
+	int temp_value;
+	Node new_node;
+	while( 1 ){
+		switch( symbol ){
+			sign_of_number = 1;
+			case minus	:	sign_of_number = -1;
+			case plus	:	symbol = SGet();
+							new_node = ( Node ) malloc( sizeof( NodeDesc ) );
+							new_node->kind = symbol;
+							new_node->left = node;
+							node = new_node;
+							temp_value = Term( node->right , 1 );
+							result += ( temp_value * sign_of_number ) ;
+							continue;
+		}
+		break;
+	}
+	#ifdef _PRINT_EXPRESSION_
+		printf("Result before in loop %d\n" , result );
+	#endif
+	return result;
+
+}
+
+static void Print( Node root , int level ){
+	register int i;
+
+	if( root != NULL ){
+		#ifdef _PRINT_DEBUG_PRINT_
+			printf( "Function print kind is  %d\n" , root->kind);
+		#endif
+		Print( root->right , level+1 );
+		for( i = 0 ; i < level ; i++ ) printf(" ");
+		
+		switch( root->kind ){
+			case plus	:	printf("+\n"); break;
+			case minus	:	printf("-\n"); break;
+			case times	:	printf("*\n"); break;
+			case divide	:	printf("/\n"); break;
+			case mod	:	printf("mod\n"); break;
+			case number	:	printf("%d\n" , root->val ); break;
+		}
+	
+		Print( root->left , level+1 ); 
+	}
 }
