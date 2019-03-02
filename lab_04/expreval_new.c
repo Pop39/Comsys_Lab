@@ -4,7 +4,10 @@
 
 #include	<assert.h>
 
-#define _PRINT_COND_
+//#define _PRINT_TERM_
+//#define _PRINT_FACTOR_
+//#define _PRINT_NUMBER_
+//#define _PRINT_EXPRESSION_
 
 static FILE *file;
 static int ch;
@@ -48,7 +51,10 @@ static void Number(){
 	while( ( '0' <= ch ) && ( ch <= '9' ) ){ // this use term of ascii code
 		val = val * 10 + ch - '0';
 		ch = getc( file );
-	} 
+	}
+	#ifdef _PRINT_NUMBER_
+		printf("Number val is %d\n" , val );
+	#endif
 }
 
 static int SGet(){
@@ -81,6 +87,9 @@ static int Factor(){
 	assert( ( symbol == number ) || ( symbol == lparen ) );
 	if( symbol == number ){
 		symbol = SGet(); // don't worry if you care to lose old or current value
+		#ifdef _PRINT_FACTOR_
+			printf("Factor will return %d\n" , val );
+		#endif
 		return val;
 	}
 	else{
@@ -88,6 +97,9 @@ static int Factor(){
 		int result = Expression();
 		assert( symbol == rparen ); // Check that have close tuple or not
 		symbol = SGet();
+		#ifdef _PRINT_FACTOR_
+			printf("Factor will return %d\n" , result );
+		#endif
 		return result;
 	}
 
@@ -96,26 +108,36 @@ static int Factor(){
 static int Term(){
 
 	int result = Factor();
+	#ifdef _PRINT_TERM_
+		printf("Result before in Term : %d\n" , result );
+	#endif
 	while( 1 ){
 		switch( symbol ){
-			case times	:	result *= Factor(); 
-							#ifdef _PRINT_COND_
+			case times	:	symbol = SGet();
+							result *= Factor(); 
+							#ifdef _PRINT_TERM_
 								printf( "Multiple Case     : %10d" , result );
 							#endif
 							continue;
-			case divide	:	result /= Factor();
-							#ifdef _PRINT_COND_
+			case divide	:	symbol = SGet();
+							result /= Factor();
+							#ifdef _PRINT_TERM_
 								printf( "Divider Case      : %10d" , result );
 							#endif
 							continue;
-			case mod	:	result %= Factor();
-							#ifdef _PRINT_COND_
-								printf( "Modulat Case      : %10d" , result );
+			case mod	:	symbol = SGet();
+							result %= Factor();
+							#ifdef _PRINT_TERM_
+								printf( "Modulation Case   : %10d" , result );
 							#endif
 							continue;
 		}
 		break;
 	}
+	#ifdef _PRINT_TERM_
+		printf("Result after in Term : %d\n" , result );
+	#endif
+	return result;
 }
 
 static int Expression(){
@@ -127,6 +149,9 @@ static int Expression(){
 	}
 
 	int result = Term() * sign_of_number ;
+	#ifdef _PRINT_EXPRESSION_
+		printf("Result before in loop %d\n" , result );
+	#endif
 
 	while( 1 ){
 		switch( symbol ){
@@ -138,6 +163,9 @@ static int Expression(){
 		}
 		break;
 	}
+	#ifdef _PRINT_EXPRESSION_
+		printf("Result before in loop %d\n" , result );
+	#endif
 	return result;
 
 }
