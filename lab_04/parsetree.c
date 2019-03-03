@@ -212,7 +212,7 @@ static int Expression( Node* node ){
 							(*node)->right = ( Node ) malloc( sizeof( NodeDesc ) );
 							symbol = SGet();
 							temp_value = Term( &(*node)->right , 1 );
-							result += ( temp_value * sign_of_number ) ;
+							result -= ( temp_value ) ;
 							continue;
 			case plus	:	new_node = ( Node ) malloc( sizeof( NodeDesc ) );
 							new_node->kind = symbol;
@@ -221,7 +221,7 @@ static int Expression( Node* node ){
 							(*node)->right = ( Node ) malloc( sizeof( NodeDesc ) );
 							symbol = SGet();
 							temp_value = Term( &(*node)->right , 1 );
-							result += ( temp_value * sign_of_number ) ;
+							result += ( temp_value ) ;
 							continue;
 		}
 		break;
