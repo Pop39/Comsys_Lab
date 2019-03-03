@@ -61,6 +61,10 @@ int main( int argc , char** argv ){
 		Print( node , 0);
 		printf( "Prefix is ");
 		Prefix( node , 1 );		
+		printf( "Postfix is ");
+		Postfix( node , 1 );		
+		printf( "Infix is ");
+		Infix( node , 1 );		
 	}
 	else{
 		printf( "Usage : expreval_new <file_name>\n");
@@ -276,6 +280,46 @@ static void Prefix( Node root , unsigned int start ){
 		}
 		Prefix( root->left , 0 );
 		Prefix( root->right , 0 );
+	}
+	if( start ) printf("\n");
+}
+
+static void Postfix( Node root , unsigned int start ){
+	if( root != NULL ){
+		Postfix( root->left , 0 );
+		Postfix( root->right , 0 );
+		switch( root->kind ){
+			case plus	:	printf("+ "); break;
+			case minus	:	printf("- "); break;
+			case times	:	printf("* "); break;
+			case divide :	printf("/ "); break;
+			case mod	:	printf("m "); break;
+			case number :	printf("%2d " , root->val ); break;
+		}
+	}	
+	if( start ) printf("\n");
+}
+
+static void Infix( Node root , unsigned int start ){
+	if( root != NULL ){
+		switch( root->kind ){
+			case plus	:	printf("( "); Infix( root->left , 0 );
+							printf("+ "); Infix( root->right , 0 );
+							printf(") "); break;
+			case minus	:	printf("( "); Infix( root->left , 0 );
+							printf("- "); Infix( root->right , 0 );
+							printf(") "); break;
+			case times	:	printf("( "); Infix( root->left , 0 );
+							printf("* "); Infix( root->right , 0 );
+							printf(") "); break;
+			case divide	:	printf("( "); Infix( root->left , 0 );
+							printf("/ "); Infix( root->right , 0 );
+							printf(") "); break;
+			case mod	:	printf("( "); Infix( root->left , 0 );
+							printf("m "); Infix( root->right , 0 );
+							printf(") "); break;
+			case number	:	printf("%d " , root->val ); break;
+		}
 	}
 	if( start ) printf("\n");
 }
