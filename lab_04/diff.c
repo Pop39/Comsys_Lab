@@ -24,7 +24,7 @@ typedef struct NodeDesc* Node;
 typedef struct NodeDesc{
 	int kind;	// plus , minus , times , dive , number , var
 	int val;	// in case is number, value
-	char name[53];
+	char name[100];
 	Node left;  // plus , minus , times , divide
 	Node right; // plus , minus , times, divide
 } NodeDesc;
@@ -53,6 +53,10 @@ static void Prefix( Node root , unsigned int start );
 static void Postfix( Node root , unsigned int start );
 
 static void Infix( Node root , unsigned int start );
+
+static Node Simplify( Node root );
+
+static Node Diff( Node root );
 
 int main( int argc , char** argv ){
 
@@ -349,4 +353,44 @@ static void CopyString( char* target , char* origin ){
 		target[run] = origin[run];
 		if( target[run] == '\0') break;
 	}
+}
+
+static Node Diff ( Node root ){
+}
+
+static Node Simplify( Node root ){
+	Node node:
+	switch( root->kind ){
+		node = ( Node ) malloc( sizeof( NodeDesc ) );
+		case number	:
+		case var	: node = root; break;
+		case minus	:
+		case plus	: node->kind = root->kind;
+					  node->left = Simplify( root->kind );
+					  node->right = Simplify( root->kind );
+					  if( (node->left->kind == number) && (node->right->kind == number) ){
+						if( node->kind == plus ) node->val = node->left->val - node->right->val;
+						else node->val = node->left->val + node->right->val;
+						node->kind = number;
+						node->left = NULL;
+						node->right = NULL;
+					  }
+					  else if( (node->left->kind == var) && (node->right->kind == var ) ){
+						if( node->kind == plus ){
+							node->kind = times;
+							node->left->kind = number;
+							node->left->val = 2;
+						}
+						else{
+							node->kind = number;
+							node->val = 0;
+							node->left = NULL;
+							node->right = NULL;
+						}
+					  }
+					  break;
+		case times	:
+		case divide :
+	}
+	return node;
 }
