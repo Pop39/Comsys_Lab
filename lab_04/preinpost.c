@@ -4,12 +4,12 @@
 
 #include	<assert.h>
 
-//#define _PRINT_TERM_
-//#define _PRINT_FACTOR_
-//#define _PRINT_NUMBER_
-//#define _PRINT_EXPRESSION_
+#define _PRINT_TERM_
+#define _PRINT_FACTOR_
+#define _PRINT_NUMBER_
+#define _PRINT_EXPRESSION_
 //#define _PRINT_DEBUG_PRINT_
-#define _DEBUG_FACTOR_NODE_
+//#define _DEBUG_FACTOR_NODE_
 #define _DEBUG_EXPRESSION_NODE_
 
 static FILE *file;
@@ -42,6 +42,12 @@ static int Expression( Node* node );
 
 static void Print( Node root , int level );
 
+static void Prefix( Node root , unsigned int start );
+
+static void Postfix( Node root , unsigned int start );
+
+static void Infix( Node root , unsigned int start );
+
 int main( int argc , char** argv ){
 
 	Node node = ( Node ) malloc( sizeof( NodeDesc ) );
@@ -53,6 +59,8 @@ int main( int argc , char** argv ){
 		assert( symbol == eof );
 		printf( "Result of expression is %d\n" , result );
 		Print( node , 0);
+		printf( "Prefix is ");
+		Prefix( node , 1 );		
 	}
 	else{
 		printf( "Usage : expreval_new <file_name>\n");
@@ -134,7 +142,7 @@ static int Term( Node* node , int sign ){
 
 	int result = Factor( node , sign );
 	#ifdef _PRINT_TERM_
-		printf("Result before in Term : %d\n" , result );
+		printf("Term before in Loop : %d\n" , result );
 	#endif
 	int temp_value;
 	Node new_node;
@@ -180,7 +188,7 @@ static int Term( Node* node , int sign ){
 		break;
 	}
 	#ifdef _PRINT_TERM_
-		printf("Result after in Term : %d\n" , result );
+		printf("Term return value : %d\n" , result );
 	#endif
 	return result;
 }
@@ -212,7 +220,7 @@ static int Expression( Node* node ){
 							(*node)->right = ( Node ) malloc( sizeof( NodeDesc ) );
 							symbol = SGet();
 							temp_value = Term( &(*node)->right , 1 );
-							result += ( temp_value * sign_of_number ) ;
+							result -= ( temp_value ) ;
 							continue;
 			case plus	:	new_node = ( Node ) malloc( sizeof( NodeDesc ) );
 							new_node->kind = symbol;
@@ -221,7 +229,7 @@ static int Expression( Node* node ){
 							(*node)->right = ( Node ) malloc( sizeof( NodeDesc ) );
 							symbol = SGet();
 							temp_value = Term( &(*node)->right , 1 );
-							result += ( temp_value * sign_of_number ) ;
+							result += ( temp_value ) ;
 							continue;
 		}
 		break;
@@ -254,4 +262,20 @@ static void Print( Node root , int level ){
 	
 		Print( root->left , level+1 ); 
 	}
+}
+
+static void Prefix( Node root , unsigned int start ){
+	if( root != NULL ){
+		switch( root->kind ){
+			case plus	:	printf("+ "); break;
+			case minus	:	printf("- "); break;
+			case times	:	printf("* "); break;
+			case divide :	printf("/ "); break;
+			case mod	:	printf("m "); break;
+			case number :	printf("%2d " , root->val ); break;
+		}
+		Prefix( root->left , 0 );
+		Prefix( root->right , 0 );
+	}
+	if( start ) printf("\n");
 }
