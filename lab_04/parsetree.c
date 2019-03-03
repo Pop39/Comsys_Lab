@@ -205,13 +205,21 @@ static int Expression( Node* node ){
 	while( 1 ){
 		sign_of_number = 1;
 		switch( symbol ){
-			case minus	:	sign_of_number = -1;
-			case plus	:	symbol = SGet();
-							new_node = ( Node ) malloc( sizeof( NodeDesc ) );
+			case minus	:	new_node = ( Node ) malloc( sizeof( NodeDesc ) );
 							new_node->kind = symbol;
 							new_node->left = *node;
 							*node = new_node;
 							(*node)->right = ( Node ) malloc( sizeof( NodeDesc ) );
+							symbol = SGet();
+							temp_value = Term( &(*node)->right , 1 );
+							result += ( temp_value * sign_of_number ) ;
+							continue;
+			case plus	:	new_node = ( Node ) malloc( sizeof( NodeDesc ) );
+							new_node->kind = symbol;
+							new_node->left = *node;
+							*node = new_node;
+							(*node)->right = ( Node ) malloc( sizeof( NodeDesc ) );
+							symbol = SGet();
 							temp_value = Term( &(*node)->right , 1 );
 							result += ( temp_value * sign_of_number ) ;
 							continue;
