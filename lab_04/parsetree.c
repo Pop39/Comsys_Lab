@@ -8,8 +8,9 @@
 //#define _PRINT_FACTOR_
 //#define _PRINT_NUMBER_
 //#define _PRINT_EXPRESSION_
-#define _PRINT_DEBUG_PRINT_
-
+//#define _PRINT_DEBUG_PRINT_
+#define _DEBUG_FACTOR_NODE_
+#define _DEBUG_EXPRESSION_NODE_
 
 static FILE *file;
 static int ch;
@@ -33,11 +34,11 @@ static void Number(); // for get value of realnumber into val (global variable)
 
 static int SGet( ); // for get type of that char by using enum in line 10 to identify
 
-static int Factor( Node node , int sign ); 
+static int Factor( Node* node , int sign ); 
 
-static int Term( Node node , int sign );
+static int Term( Node* node , int sign );
 
-static int Expression( Node node );
+static int Expression( Node* node );
 
 static void Print( Node root , int level );
 
@@ -48,7 +49,7 @@ int main( int argc , char** argv ){
 	if( argc == 2 ){
 		SInit( argv[1] );
 		symbol = SGet();
-		int result = Expression( node );
+		int result = Expression( &node );
 		assert( symbol == eof );
 		printf( "Result of expression is %d\n" , result );
 		Print( node , 0);
@@ -101,7 +102,7 @@ static int SGet(){
 	return symbol;
 }
 
-static int Factor( Node node , int sign ){
+static int Factor( Node* node , int sign ){
 
 	assert( ( symbol == number ) || ( symbol == lparen ) );
 	if( symbol == number ){
@@ -109,8 +110,11 @@ static int Factor( Node node , int sign ){
 		#ifdef _PRINT_FACTOR_
 			printf("Factor will return %d\n" , val );
 		#endif
-		node->kind = number;
-		node->val = number * sign;
+		#ifdef _DEBUG_FACTOR_NODE_
+			printf("Factor val : sign are %5d : %d\n" , val , sign );
+		#endif
+		(*node)->kind = number;
+		(*node)->val = val * sign;
 		return val;
 	}
 	else{
@@ -126,7 +130,7 @@ static int Factor( Node node , int sign ){
 
 }
 
-static int Term( Node node , int sign ){
+static int Term( Node* node , int sign ){
 
 	int result = Factor( node , sign );
 	#ifdef _PRINT_TERM_
@@ -139,34 +143,37 @@ static int Term( Node node , int sign ){
 			case times	:	symbol = SGet();
 							new_node = ( Node ) malloc( sizeof(NodeDesc) );
 							new_node->kind = times;
-							new_node->left = node;
-							node = new_node;
-							temp_value = Factor( node->right , sign );
+							new_node->left = *node;
+							*node = new_node;
+							(*node)->right = ( Node ) malloc( sizeof( NodeDesc ) );
+							temp_value = Factor( &((*node)->right) , 1 );
 							result *= temp_value;
 							#ifdef _PRINT_TERM_
-								printf( "Multiple Case     : %10d" , result );
+								printf( "Multiple Case     : %d\n" , result );
 							#endif
 							continue;
 			case divide	:	symbol = SGet();
 							new_node = ( Node ) malloc( sizeof(NodeDesc) );
 							new_node->kind = divide;
-							new_node->left = node;
-							node = new_node;
-							temp_value = Factor( node->right , sign );
+							new_node->left = *node;
+							*node = new_node;
+							(*node)->right = ( Node ) malloc( sizeof( NodeDesc ) );
+							temp_value = Factor( &((*node)->right) , 1 );
 							result /= temp_value;
 							#ifdef _PRINT_TERM_
-								printf( "Divider Case      : %10d" , result );
+								printf( "Divider Case      : %d\n" , result );
 							#endif
 							continue;
 			case mod	:	symbol = SGet();
 							new_node = ( Node ) malloc( sizeof(NodeDesc) );
 							new_node->kind = mod;
-							new_node->left = node;
-							node = new_node;
-							temp_value = Factor( node->right , sign );
+							new_node->left = *node;
+							*node = new_node;
+							(*node)->right = ( Node ) malloc( sizeof( NodeDesc ) );
+							temp_value = Factor( &((*node)->right) , 1);
 							result %= temp_value;
 							#ifdef _PRINT_TERM_
-								printf( "Modulation Case   : %10d" , result );
+								printf( "Modulation Case   : %d\n" , result );
 							#endif
 							continue;
 		}
@@ -178,38 +185,41 @@ static int Term( Node node , int sign ){
 	return result;
 }
 
-static int Expression( Node node ){
+static int Expression( Node* node ){
 
 	int sign_of_number = 1;
 	switch( symbol ){
 		case minus	: sign_of_number = -1;
 		case plus	: symbol = SGet();
 	}
-
+	#ifdef _DEBUG_EXPRESSION_NODE_
+		printf( "Expression sign_of_number before loop %d\n" , sign_of_number );
+	#endif
 	int result = Term( node , sign_of_number )*sign_of_number ;
 	#ifdef _PRINT_EXPRESSION_
-		printf("Result before in loop %d\n" , result );
+		printf("Expression before in loop %d\n" , result );
 	#endif
 
 	int temp_value;
 	Node new_node;
 	while( 1 ){
+		sign_of_number = 1;
 		switch( symbol ){
-			sign_of_number = 1;
 			case minus	:	sign_of_number = -1;
 			case plus	:	symbol = SGet();
 							new_node = ( Node ) malloc( sizeof( NodeDesc ) );
 							new_node->kind = symbol;
-							new_node->left = node;
-							node = new_node;
-							temp_value = Term( node->right , 1 );
+							new_node->left = *node;
+							*node = new_node;
+							(*node)->right = ( Node ) malloc( sizeof( NodeDesc ) );
+							temp_value = Term( &(*node)->right , 1 );
 							result += ( temp_value * sign_of_number ) ;
 							continue;
 		}
 		break;
 	}
 	#ifdef _PRINT_EXPRESSION_
-		printf("Result before in loop %d\n" , result );
+		printf("Expression after loop %d\n" , result );
 	#endif
 	return result;
 
@@ -223,15 +233,15 @@ static void Print( Node root , int level ){
 			printf( "Function print kind is  %d\n" , root->kind);
 		#endif
 		Print( root->right , level+1 );
-		for( i = 0 ; i < level ; i++ ) printf(" ");
+		for( i = 0 ; i < level ; i++ ) printf("   ");
 		
-		switch( root->kind ){
-			case plus	:	printf("+\n"); break;
-			case minus	:	printf("-\n"); break;
-			case times	:	printf("*\n"); break;
-			case divide	:	printf("/\n"); break;
-			case mod	:	printf("mod\n"); break;
-			case number	:	printf("%d\n" , root->val ); break;
+		switch( root->kind ){ // Have space for sign number
+			case plus	:	printf(" +\n"); break;
+			case minus	:	printf(" -\n"); break;
+			case times	:	printf(" *\n"); break;
+			case divide	:	printf(" /\n"); break;
+			case mod	:	printf(" m\n"); break; // m  is modulation
+			case number	:	printf("%2d\n" , root->val ); break;
 		}
 	
 		Print( root->left , level+1 ); 
