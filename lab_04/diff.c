@@ -4,15 +4,15 @@
 
 #include	<assert.h>
 
-#define _PRINT_TERM_
-#define _PRINT_FACTOR_
-#define _PRINT_NUMBER_
-#define _PRINT_EXPRESSION_
+//#define _PRINT_TERM_
+//#define _PRINT_FACTOR_
+//#define _PRINT_NUMBER_
+//#define _PRINT_EXPRESSION_
 //#define _PRINT_DEBUG_PRINT_
 //#define _DEBUG_FACTOR_NODE_
-#define _DEBUG_EXPRESSION_NODE_
-#define _NORMAL_DEBUG_
-#define _DEBUG_SIMPLIFY_
+//#define _DEBUG_EXPRESSION_NODE_
+//#define _NORMAL_DEBUG_
+//#define _DEBUG_SIMPLIFY_
 
 static FILE *file;
 static int ch;
@@ -69,16 +69,20 @@ int main( int argc , char** argv ){
 		SInit( argv[1] );
 		symbol = SGet();
 		Expression( &node );
-		#ifdef _NORMAL_DEBUG_
-			printf( "Finish Expression\n"); 
-		#endif
+		printf( "Expression Infix : ");
+		Infix( node , 1 );
+
+		node = Simplify( node );
+		printf( "Simplify before diff : ");
+		Infix( node , 1 );
+
 		diff_node = Diff( node );
-		Print( diff_node , 0 ); 
-		#ifdef _NORMAL_DEBUG_
-			printf( "Finish Diff\n"); 
-		#endif
+		printf( "Differential : ");
+		Infix( diff_node , 1 ); 
+
 		simplify_node = Simplify( diff_node );
-		Print( simplify_node , 0 ); 
+		printf( "Simplify after diff : ");
+		Infix( simplify_node , 1 ); 
 		#ifdef _NORMAL_DEBUG_
 			printf( "Finish Simplify\n"); 
 		#endif
