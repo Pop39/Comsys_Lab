@@ -11,6 +11,7 @@
 //#define _PRINT_DEBUG_PRINT_
 //#define _DEBUG_FACTOR_NODE_
 #define _DEBUG_EXPRESSION_NODE_
+#define _NORMAL_DEBUG_
 
 static FILE *file;
 static int ch;
@@ -61,19 +62,17 @@ static Node Diff( Node root );
 int main( int argc , char** argv ){
 
 	Node node = ( Node ) malloc( sizeof( NodeDesc ) );
-
+	Node diff_node = ( Node ) malloc( sizeof( NodeDesc ) );
 	if( argc == 2 ){
 		SInit( argv[1] );
 		symbol = SGet();
 		Expression( &node );
+		#ifdef _NORMAL_DEBUG_
+			printf( "Finish Expression\n"); 
+		#endif
+		diff_node = Diff( node );
+		Print( diff_node , 0 ); 
 		assert( symbol == eof );
-		Print( node , 0);
-		printf( "Prefix is ");
-		Prefix( node , 1 );		
-		printf( "Postfix is ");
-		Postfix( node , 1 );		
-		printf( "Infix is ");
-		Infix( node , 1 );		
 	}
 	else{
 		printf( "Usage : expreval_new <file_name>\n");
@@ -365,20 +364,36 @@ static Node Diff ( Node root ){
 	Node minus_node_left;
 	Node minus_node_right;
 	Node multi_node;
+	node = ( Node ) malloc( sizeof( NodeDesc ) );
 	switch( root->kind ){
-		node = ( Node ) malloc( sizeof( NodeDesc ) );
-		case number : node->val = 0;
+		case number : node->kind = number;
+					  node->left = NULL;
+					  node->right = NULL;
+					  node->val = 0;
+					  #ifdef _NORMAL_DEBUG_
+						printf("Diff kind is number\n");
+					  #endif
+					  break;
 		case var	: node->val = 1;
 					  node->kind = number;
 					  node->left = NULL;
 					  node->right = NULL;
+					  #ifdef _NORMAL_DEBUG_
+						printf("Diff kind is var\n");
+					  #endif
 					  break;
 		case plus	:
 		case minus	: node->kind = root->kind;
+					  #ifdef _NORMAL_DEBUG_
+						printf("Diff kind is plus or minus\n");
+					  #endif
 					  node->left = Diff( root->left );
 					  node->right = Diff( root->right );
 					  break;
 		case times	: // We will use pattern front * diff(back) + back * diff( front )
+					  #ifdef _NORMAL_DEBUG_
+						printf("Diff kind is times\n");
+					  #endif
 					  diff_back = ( Node ) malloc( sizeof( NodeDesc ) );
 					  diff_front = ( Node ) malloc( sizeof( NodeDesc ) );
 					  diff_back = Diff( root->right );
@@ -398,6 +413,9 @@ static Node Diff ( Node root ){
 					  node->left = node->left;
 					  break;
 		case divide	: // We will use pattern if (x/y)' = (yx' - xy')/y^2
+					  #ifdef _NORMAL_DEBUG_
+						printf("Diff kind is divide\n");
+					  #endif
 					  diff_top = ( Node ) malloc( sizeof( NodeDesc ) );
 					  diff_bottom = ( Node ) malloc( sizeof( NodeDesc ) );
 					  diff_top = Diff( root->left );
