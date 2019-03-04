@@ -522,28 +522,25 @@ static Node Simplify( Node root ){
 							node->right = NULL;
 						}
 					  }
-					  else if( ( node->left->kind == var ) && ( node->right->kind == number ) ){
-						if( node->right->val == 0 ){
-							assert( node->kind != divide );
-							node->kind = number;
-							node->val = 0;
-							node->left = NULL;
-							node->right = NULL;
-						}
-						else if( node->right->val == 1 ){
-							node->kind = var;
-							CopyString( node->name , node->left->name );
-							node->left = NULL;
-							node->right = NULL;
-						}
+					  else if( ( node->right->val == 0 ) && ( node->right->kind == number ) ){
+						assert( node->kind != divide );
+						node->kind = number;
+						node->val = 0;
+						node->left = NULL;
+						node->right = NULL;
 					  }
-					  else if( ( node->left->kind == number ) && ( node->right->kind == var ) ){
-						if( node->left->val == 0 ){
-							node->kind = number;
-							node->val = 0;
-							node->left = NULL;
-							node->right = NULL;
-						}
+					  else if( ( node->left->kind == number ) && ( node->left->val == 1 ) && 
+								node->kind == times ){
+						node = node->right;
+					  }
+					  else if( ( node->left->kind == number) && ( node->left->val == 0) ){
+						node->kind = number;
+						node->val = 0;
+						node->left = NULL;
+						node->right = NULL;
+					  }
+					  else if( ( node->right->kind == number ) && ( node->right->val == 1 ) ){
+						node = node->left;
 					  }
 					  break;
 		default		: assert( root->kind != mod );
