@@ -12,6 +12,7 @@
 //#define _DEBUG_FACTOR_NODE_
 #define _DEBUG_EXPRESSION_NODE_
 #define _NORMAL_DEBUG_
+#define _DEBUG_SIMPLIFY_
 
 static FILE *file;
 static int ch;
@@ -63,6 +64,7 @@ int main( int argc , char** argv ){
 
 	Node node = ( Node ) malloc( sizeof( NodeDesc ) );
 	Node diff_node = ( Node ) malloc( sizeof( NodeDesc ) );
+	Node simplify_node = ( Node ) malloc( sizeof( NodeDesc ) );
 	if( argc == 2 ){
 		SInit( argv[1] );
 		symbol = SGet();
@@ -72,6 +74,14 @@ int main( int argc , char** argv ){
 		#endif
 		diff_node = Diff( node );
 		Print( diff_node , 0 ); 
+		#ifdef _NORMAL_DEBUG_
+			printf( "Finish Diff\n"); 
+		#endif
+		simplify_node = Simplify( diff_node );
+		Print( simplify_node , 0 ); 
+		#ifdef _NORMAL_DEBUG_
+			printf( "Finish Simplify\n"); 
+		#endif
 		assert( symbol == eof );
 	}
 	else{
@@ -410,7 +420,7 @@ static Node Diff ( Node root ){
 
 					  node->kind = plus;
 					  node->right = node_right;
-					  node->left = node->left;
+					  node->left = node_left;
 					  break;
 		case divide	: // We will use pattern if (x/y)' = (yx' - xy')/y^2
 					  #ifdef _NORMAL_DEBUG_
@@ -459,6 +469,7 @@ static Node Diff ( Node root ){
 
 static Node Simplify( Node root ){
 	Node node;
+	node = ( Node ) malloc( sizeof( NodeDesc ) );
 	switch( root->kind ){
 		node = ( Node ) malloc( sizeof( NodeDesc ) );
 		case number	:
@@ -468,8 +479,8 @@ static Node Simplify( Node root ){
 					  node->left = Simplify( root->left );
 					  node->right = Simplify( root->right );
 					  if( (node->left->kind == number) && (node->right->kind == number) ){
-						if( node->kind == plus ) node->val = node->left->val - node->right->val;
-						else node->val = node->left->val + node->right->val;
+						if( node->kind == plus ) node->val = node->left->val + node->right->val;
+						else node->val = node->left->val - node->right->val;
 						node->kind = number;
 						node->left = NULL;
 						node->right = NULL;
@@ -503,6 +514,29 @@ static Node Simplify( Node root ){
 						if( node->kind == divide ){
 							node->kind = number;
 							node->val = 1;
+							node->left = NULL;
+							node->right = NULL;
+						}
+					  }
+					  else if( ( node->left->kind == var ) && ( node->right->kind == number ) ){
+						if( node->right->val == 0 ){
+							assert( node->kind != divide );
+							node->kind = number;
+							node->val = 0;
+							node->left = NULL;
+							node->right = NULL;
+						}
+						else if( node->right->val == 1 ){
+							node->kind = var;
+							CopyString( node->name , node->left->name );
+							node->left = NULL;
+							node->right = NULL;
+						}
+					  }
+					  else if( ( node->left->kind == number ) && ( node->right->kind == var ) ){
+						if( node->left->val == 0 ){
+							node->kind = number;
+							node->val = 0;
 							node->left = NULL;
 							node->right = NULL;
 						}
