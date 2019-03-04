@@ -370,13 +370,63 @@ static Node Diff ( Node root ){
 					  node->left = Diff( root->left );
 					  node->right = Diff( root->right );
 					  break;
-		case times	: if( root->left->kind == val && root->right->kind == val ){
-						node->kind = number;
-						node->val = root->left->val * root->right->val;
-						node->left = NULL;
-						node->right = NULL;
-					  }
-					  else if( root->left->kind == var )
+		case times	: // We will use pattern front * diff(back) + back * diff( front )
+					  Node diff_back = ( Node ) malloc( sizeof( NodeDesc ) );
+					  Node diff_front = ( Node ) malloc( sizeof( NodeDesc ) );
+					  diff_back = Diff( root->right );
+					  diff_front = Diff( root->left );
+
+					  Node node_left = ( Node ) malloc( sizeof( NodeDesc ) );
+					  Node node_right = ( Node ) malloc( sizeof( NodeDesc ) );
+					  node_left->kind = times;
+					  node_left->left = root->left ;
+					  node_left->right = diff_back;
+					  node_right->kind = times;
+					  node_right->left = root->right ;
+					  node_right->right = diff_front;
+
+					  node->kind = plus;
+					  node->right = node_right;
+					  node->left = node->left;
+					  break;
+		case divide	: // We will use pattern if (x/y)' = (yx' - xy')/y^2
+					  Node diff_top = ( Node ) malloc( sizeof( NodeDesc ) );
+					  Node diff_bottom = ( Node ) malloc( sizeof( NodeDesc ) );
+					  diff_top = Diff( root->left );
+					  diff_bottom = Diff( root->right );
+					  
+					  node->kind = divide;
+					  Node minus_node = ( Node ) malloc( sizeof( NodeDesc ) );
+					  Node minus_node_left = ( Node ) malloc( sizeof( NodeDesc ) );
+					  Node minus_node_right = ( Node ) malloc( sizeof( NodeDesc ) );
+					  minus_node_left->right = ( Node ) malloc( sizeof( NodeDesc ) );
+					  minus_node_left->left = ( Node ) malloc( sizeof( NodeDesc ) );
+					  minus_node_right->right = ( Node ) malloc( sizeof( NodeDesc ) );
+					  minus_node_right->left = ( Node ) malloc( sizeof( NodeDesc ) );
+					  Node multi_node = ( Node ) malloc( sizeof( NodeDesc ) );
+					  multi_node->left = ( Node ) malloc( sizeof( NodeDesc ) );
+					  multi_node->right = ( Node ) malloc( sizeof( NodeDesc ) );
+
+					  minus_node_left->kind = times;
+					  minus_node_left->left = root->right;
+					  minus_node_left->right = diff_top;
+					  
+					  minus_node_right->kind = times;
+					  minus_node_right->left = root->left;
+					  minus_node_right->right = diff_bottom;
+
+					  minus_node->kind = minus;
+					  minus_node->left = minus_node_left;
+					  minus_node->right = minus_node_right;
+
+					  multi_node->kind = times;
+					  multi_node->right = root->right;
+					  multi_node->left = root->right;
+
+					  node->left = minus_node;
+					  node->right = multi_node; 
+					  break;
+
 	}
 	return node;
 }
