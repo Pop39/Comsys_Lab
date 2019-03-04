@@ -356,6 +356,29 @@ static void CopyString( char* target , char* origin ){
 }
 
 static Node Diff ( Node root ){
+	Node node;
+	switch( root->kind ){
+		node = ( Node ) malloc( sizeof( NodeDesc ) );
+		case number : node->val = 0;
+		case var	: node->val = 1;
+					  node->kind = number;
+					  node->left = NULL;
+					  node->right = NULL;
+					  break;
+		case plus	:
+		case minus	: node->kind = root->kind;
+					  node->left = Diff( root->left );
+					  node->right = Diff( root->right );
+					  break;
+		case times	: if( root->left->kind == val && root->right->kind == val ){
+						node->kind = number;
+						node->val = root->left->val * root->right->val;
+						node->left = NULL;
+						node->right = NULL;
+					  }
+					  else if( root->left->kind == var )
+	}
+	return node;
 }
 
 static Node Simplify( Node root ){
@@ -390,7 +413,26 @@ static Node Simplify( Node root ){
 					  }
 					  break;
 		case times	:
-		case divide :
+		case divide : node->kind = root->kind;
+					  node->left = Simplify( root->kind );
+					  node->right = Simplify( root->kind );
+					  if( (node->left->kind == number ) && (node->right->kind == number ) ){
+						if( node->kind == times ) node->val = node->left->val * node->right->val;
+						else node->val = node->left->val / node->right->val;
+						node->kind = number;
+						node->left = NULL;
+						node->right = NULL;
+					  }
+					  else if( ( node->left->kind == var ) && ( node->right->kind == var ) ){
+						if( node->kind == divide ){
+							node->kind = number;
+							node->val = 1;
+							node->left = NULL;
+							node->right = NULL;
+						}
+					  }
+					  break;
+		default		: assert( root->kind != mod );
 	}
 	return node;
 }
