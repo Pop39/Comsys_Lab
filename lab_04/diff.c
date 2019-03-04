@@ -357,6 +357,14 @@ static void CopyString( char* target , char* origin ){
 
 static Node Diff ( Node root ){
 	Node node;
+	Node diff_back , diff_bottom;
+	Node diff_front , diff_top;
+	Node node_left;
+	Node node_right;
+	Node minus_node;
+	Node minus_node_left;
+	Node minus_node_right;
+	Node multi_node;
 	switch( root->kind ){
 		node = ( Node ) malloc( sizeof( NodeDesc ) );
 		case number : node->val = 0;
@@ -371,13 +379,13 @@ static Node Diff ( Node root ){
 					  node->right = Diff( root->right );
 					  break;
 		case times	: // We will use pattern front * diff(back) + back * diff( front )
-					  Node diff_back = ( Node ) malloc( sizeof( NodeDesc ) );
-					  Node diff_front = ( Node ) malloc( sizeof( NodeDesc ) );
+					  diff_back = ( Node ) malloc( sizeof( NodeDesc ) );
+					  diff_front = ( Node ) malloc( sizeof( NodeDesc ) );
 					  diff_back = Diff( root->right );
 					  diff_front = Diff( root->left );
 
-					  Node node_left = ( Node ) malloc( sizeof( NodeDesc ) );
-					  Node node_right = ( Node ) malloc( sizeof( NodeDesc ) );
+					  node_left = ( Node ) malloc( sizeof( NodeDesc ) );
+					  node_right = ( Node ) malloc( sizeof( NodeDesc ) );
 					  node_left->kind = times;
 					  node_left->left = root->left ;
 					  node_left->right = diff_back;
@@ -390,20 +398,20 @@ static Node Diff ( Node root ){
 					  node->left = node->left;
 					  break;
 		case divide	: // We will use pattern if (x/y)' = (yx' - xy')/y^2
-					  Node diff_top = ( Node ) malloc( sizeof( NodeDesc ) );
-					  Node diff_bottom = ( Node ) malloc( sizeof( NodeDesc ) );
+					  diff_top = ( Node ) malloc( sizeof( NodeDesc ) );
+					  diff_bottom = ( Node ) malloc( sizeof( NodeDesc ) );
 					  diff_top = Diff( root->left );
 					  diff_bottom = Diff( root->right );
 					  
 					  node->kind = divide;
-					  Node minus_node = ( Node ) malloc( sizeof( NodeDesc ) );
-					  Node minus_node_left = ( Node ) malloc( sizeof( NodeDesc ) );
-					  Node minus_node_right = ( Node ) malloc( sizeof( NodeDesc ) );
+					  minus_node = ( Node ) malloc( sizeof( NodeDesc ) );
+					  minus_node_left = ( Node ) malloc( sizeof( NodeDesc ) );
+					  minus_node_right = ( Node ) malloc( sizeof( NodeDesc ) );
 					  minus_node_left->right = ( Node ) malloc( sizeof( NodeDesc ) );
 					  minus_node_left->left = ( Node ) malloc( sizeof( NodeDesc ) );
 					  minus_node_right->right = ( Node ) malloc( sizeof( NodeDesc ) );
 					  minus_node_right->left = ( Node ) malloc( sizeof( NodeDesc ) );
-					  Node multi_node = ( Node ) malloc( sizeof( NodeDesc ) );
+					  multi_node = ( Node ) malloc( sizeof( NodeDesc ) );
 					  multi_node->left = ( Node ) malloc( sizeof( NodeDesc ) );
 					  multi_node->right = ( Node ) malloc( sizeof( NodeDesc ) );
 
@@ -432,15 +440,15 @@ static Node Diff ( Node root ){
 }
 
 static Node Simplify( Node root ){
-	Node node:
+	Node node;
 	switch( root->kind ){
 		node = ( Node ) malloc( sizeof( NodeDesc ) );
 		case number	:
 		case var	: node = root; break;
 		case minus	:
 		case plus	: node->kind = root->kind;
-					  node->left = Simplify( root->kind );
-					  node->right = Simplify( root->kind );
+					  node->left = Simplify( root->left );
+					  node->right = Simplify( root->right );
 					  if( (node->left->kind == number) && (node->right->kind == number) ){
 						if( node->kind == plus ) node->val = node->left->val - node->right->val;
 						else node->val = node->left->val + node->right->val;
@@ -464,8 +472,8 @@ static Node Simplify( Node root ){
 					  break;
 		case times	:
 		case divide : node->kind = root->kind;
-					  node->left = Simplify( root->kind );
-					  node->right = Simplify( root->kind );
+					  node->left = Simplify( root->left );
+					  node->right = Simplify( root->right );
 					  if( (node->left->kind == number ) && (node->right->kind == number ) ){
 						if( node->kind == times ) node->val = node->left->val * node->right->val;
 						else node->val = node->left->val / node->right->val;
