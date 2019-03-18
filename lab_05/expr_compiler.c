@@ -81,6 +81,9 @@ int main( int argc , char** argv ){
 
 		WInit( argv[2] );
 		assert( symbol == eof );
+		Prefix( node, 1 );
+		fprintf(asm_file, "\tli $v0, 1\n\tsyscall\n");
+		fprintf(asm_file, "\tli $v0, 10\n\tsyscall\n");
 	}
 	else{
 		printf( "Usage : expreval_new <file_name>\n");
@@ -351,9 +354,9 @@ static void Prefix( Node root , unsigned int start ){
 							fprintf(asm_file, "sw $a0 , 0($sp)\n");
 							fprintf(asm_file, "addiu $sp , $sp , -4\n");
 			case number :	printf("%2d " , root->val );
-							fprintf(asm_file, "li $a0, %d\n", root->val);
-							fprintf(asm_file, "sw $a0, 0($sp)\n");
-							fprintf(asm_file, "addiu $sp, $sp, -4\n");
+							fprintf(asm_file, "\tli $a0, %d\n", root->val);
+							fprintf(asm_file, "\tsw $a0, 0($sp)\n");
+							fprintf(asm_file, "\taddiu $sp, $sp, -4\n");
 							break;
 			case var	:	printf("%s " , root->name ); break;
 		}
