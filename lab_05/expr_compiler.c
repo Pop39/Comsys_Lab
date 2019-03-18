@@ -75,13 +75,13 @@ int main( int argc , char** argv ){
 		printf( "Expression Infix : ");
 		Infix( node , 1 );
 
-		node = Simplify( node );
-		printf( "Simplify : ");
-		Infix( node , 1 );
+//		node = Simplify( node );
+//		printf( "Simplify : ");
+//		Infix( node , 1 );
 
 		WInit( argv[2] );
 		assert( symbol == eof );
-		Prefix( node, 1 );
+		Postfix( node, 1 );
 		fprintf(asm_file, "\tli $v0, 1\n\tsyscall\n");
 		fprintf(asm_file, "\tli $v0, 10\n\tsyscall\n");
 	}
@@ -308,51 +308,53 @@ static void Print( Node root , int level ){
 	}
 }
 
-static void Prefix( Node root , unsigned int start ){
+static void Postfix( Node root , unsigned int start ){
 	if( root != NULL ){
+		Postfix( root->left , 0 );
+		Postfix( root->right , 0 );
 		switch( root->kind ){
 			case plus	:	printf("+ "); 
-							fprintf(asm_file, "lw $t0, 8($sp)\n");
-							fprintf(asm_file, "lw $t1, 4($sp)\n");
-							fprintf(asm_file, "add $a0, $t0, $t1\n");
-							fprintf(asm_file, "addiu $sp, $sp, 8\n");
-							fprintf(asm_file, "sw $a0 , 0($sp)\n");
-							fprintf(asm_file, "addiu $sp , $sp , -4\n");
+							fprintf(asm_file, "\tlw $t0, 8($sp)\n");
+							fprintf(asm_file, "\tlw $t1, 4($sp)\n");
+							fprintf(asm_file, "\tadd $a0, $t0, $t1\n");
+							fprintf(asm_file, "\taddiu $sp, $sp, 8\n");
+							fprintf(asm_file, "\tsw $a0 , 0($sp)\n");
+							fprintf(asm_file, "\taddiu $sp , $sp , -4\n");
 							break;
 			case minus	:	printf("- "); 
-							fprintf(asm_file, "lw $t0, 8($sp)\n");
-							fprintf(asm_file, "lw $t1, 4($sp)\n");
-							fprintf(asm_file, "sub $a0, $t0, $t1\n");
-							fprintf(asm_file, "addiu $sp, $sp, 8\n");
-							fprintf(asm_file, "sw $a0 , 0($sp)\n");
-							fprintf(asm_file, "addiu $sp , $sp , -4\n");
+							fprintf(asm_file, "\tlw $t0, 8($sp)\n");
+							fprintf(asm_file, "\tlw $t1, 4($sp)\n");
+							fprintf(asm_file, "\tsub $a0, $t0, $t1\n");
+							fprintf(asm_file, "\taddiu $sp, $sp, 8\n");
+							fprintf(asm_file, "\tsw $a0 , 0($sp)\n");
+							fprintf(asm_file, "\taddiu $sp , $sp , -4\n");
 							break;
 			case times	:	printf("* "); 
-							fprintf(asm_file, "lw $t0, 8($sp)\n");
-							fprintf(asm_file, "lw $t1, 4($sp)\n");
-							fprintf(asm_file, "mult $t0, $t1\n");
-							fprintf(asm_file, "mflo $a0\n");
-							fprintf(asm_file, "addiu $sp, $sp, 8\n");
-							fprintf(asm_file, "sw $a0 , 0($sp)\n");
-							fprintf(asm_file, "addiu $sp , $sp , -4\n");
+							fprintf(asm_file, "\tlw $t0, 8($sp)\n");
+							fprintf(asm_file, "\tlw $t1, 4($sp)\n");
+							fprintf(asm_file, "\tmult $t0, $t1\n");
+							fprintf(asm_file, "\tmflo $a0\n");
+							fprintf(asm_file, "\taddiu $sp, $sp, 8\n");
+							fprintf(asm_file, "\tsw $a0 , 0($sp)\n");
+							fprintf(asm_file, "\taddiu $sp , $sp , -4\n");
 							break;
 			case divide :	printf("/ "); 
-							fprintf(asm_file, "lw $t0, 8($sp)\n");
-							fprintf(asm_file, "lw $t1, 4($sp)\n");
-							fprintf(asm_file, "div $t0, $t1\n");
-							fprintf(asm_file, "mflo $a0\n");
-							fprintf(asm_file, "addiu $sp, $sp, 8\n");
-							fprintf(asm_file, "sw $a0 , 0($sp)\n");
-							fprintf(asm_file, "addiu $sp , $sp , -4\n");
+							fprintf(asm_file, "\tlw $t0, 8($sp)\n");
+							fprintf(asm_file, "\tlw $t1, 4($sp)\n");
+							fprintf(asm_file, "\tdiv $t0, $t1\n");
+							fprintf(asm_file, "\tmflo $a0\n");
+							fprintf(asm_file, "\taddiu $sp, $sp, 8\n");
+							fprintf(asm_file, "\tsw $a0 , 0($sp)\n");
+							fprintf(asm_file, "\taddiu $sp , $sp , -4\n");
 							break;
 			case mod	:	printf("m "); break;
-							fprintf(asm_file, "lw $t0, 8($sp)\n");
-							fprintf(asm_file, "lw $t1, 4($sp)\n");
-							fprintf(asm_file, "div $t0, $t1\n");
-							fprintf(asm_file, "mfhi $a0\n");
-							fprintf(asm_file, "addiu $sp, $sp, 8\n");
-							fprintf(asm_file, "sw $a0 , 0($sp)\n");
-							fprintf(asm_file, "addiu $sp , $sp , -4\n");
+							fprintf(asm_file, "\tlw $t0, 8($sp)\n");
+							fprintf(asm_file, "\tlw $t1, 4($sp)\n");
+							fprintf(asm_file, "\tdiv $t0, $t1\n");
+							fprintf(asm_file, "\tmfhi $a0\n");
+							fprintf(asm_file, "\taddiu $sp, $sp, 8\n");
+							fprintf(asm_file, "\tsw $a0 , 0($sp)\n");
+							fprintf(asm_file, "\taddiu $sp , $sp , -4\n");
 			case number :	printf("%2d " , root->val );
 							fprintf(asm_file, "\tli $a0, %d\n", root->val);
 							fprintf(asm_file, "\tsw $a0, 0($sp)\n");
@@ -360,16 +362,12 @@ static void Prefix( Node root , unsigned int start ){
 							break;
 			case var	:	printf("%s " , root->name ); break;
 		}
-		Prefix( root->left , 0 );
-		Prefix( root->right , 0 );
 	}
 	if( start ) printf("\n");
 }
 
-static void Postfix( Node root , unsigned int start ){
+static void Prefix( Node root , unsigned int start ){
 	if( root != NULL ){
-		Postfix( root->left , 0 );
-		Postfix( root->right , 0 );
 		switch( root->kind ){
 			case plus	:	printf("+ "); break;
 			case minus	:	printf("- "); break;
@@ -380,6 +378,8 @@ static void Postfix( Node root , unsigned int start ){
 			case var	:	printf("%s " , root->name ); break;
 		}
 	}	
+	Prefix( root->left , 0 );
+	Prefix( root->right , 0 );
 	if( start ) printf("\n");
 }
 
