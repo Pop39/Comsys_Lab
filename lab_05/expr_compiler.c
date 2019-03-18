@@ -99,6 +99,8 @@ static void WInit( char* file_name ){
 	fprintf( asm_file , ".data\n");
 	fprintf( asm_file , ".text\n");
 	fprintf( asm_file , ".globl main\n");
+	fprintf( asm_file , "main:\n");
+	
 }
 
 static void Number(){
@@ -306,12 +308,38 @@ static void Print( Node root , int level ){
 static void Prefix( Node root , unsigned int start ){
 	if( root != NULL ){
 		switch( root->kind ){
-			case plus	:	printf("+ "); break;
-			case minus	:	printf("- "); break;
-			case times	:	printf("* "); break;
-			case divide :	printf("/ "); break;
+			case plus	:	printf("+ "); 
+							fprintf(asm_file, "lw $t0, 4($sp)\n");
+							fprintf(asm_file, "add $a0, $a0, $t0\n");
+							fprintf(asm_file, "addiu $sp, $sp, 4\n");
+							break;
+			case minus	:	printf("- "); 
+							fprintf(asm_file, "lw $t0, 4($sp)\n");
+							fprintf(asm_file, "sub $a0, $a0, $t0\n");
+							fprintf(asm_file, "addiu $sp, $sp, 4\n");
+							break;
+			case times	:	printf("* "); 
+							fprintf(asm_file, "lw $t0, 4($sp)\n");
+							fprintf(asm_file, "mult $a0, $t0\n");
+							fprintf(asm_file, "mflo $a0\n");
+							fprintf(asm_file, "addiu $sp, $sp, 4\n");
+							break;
+			case divide :	printf("/ "); 
+							fprintf(asm_file, "lw $t0, 4($sp)\n");
+							fprintf(asm_file, "div $a0, $t0\n");
+							fprintf(asm_file, "mflo $a0\n");
+							fprintf(asm_file, "addiu $sp, $sp, 4\n");
+							break;
 			case mod	:	printf("m "); break;
-			case number :	printf("%2d " , root->val ); break;
+							fprintf(asm_file, "lw $t0, 4($sp)\n");
+							fprintf(asm_file, "div $a0, $t0\n");
+							fprintf(asm_file, "mfhi $a0\n");
+							fprintf(asm_file, "addiu $sp, $sp, 4\n");
+			case number :	printf("%2d " , root->val );
+							fprintf(asm_file, "li $a0, %d\n", root->val);
+							fprintf(asm_file, "sw $a0, 0($sp)\n");
+							fprintf(asm_file, "addiu $sp, $sp, -4\n");
+							break;
 			case var	:	printf("%s " , root->name ); break;
 		}
 		Prefix( root->left , 0 );
