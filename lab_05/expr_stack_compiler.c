@@ -82,7 +82,6 @@ int main( int argc , char** argv ){
 		WInit( argv[2] );
 		assert( symbol == eof );
 		Postfix( node, 1 );
-		fprintf(stack_file, "}\n");
 	}
 	else{
 		printf( "Usage : expreval_new <file_name>\n");
@@ -98,9 +97,6 @@ static void SInit( char* file_name ){
 
 static void WInit( char* file_name ){
 	stack_file = fopen( file_name , "w" );
-	fprintf( stack_file , "#include <stdio.h>\n");
-	fprintf( stack_file , "int main(void) {\n");
-	
 }
 
 static void Number(){
@@ -311,28 +307,31 @@ static void Postfix( Node root , unsigned int start ){
 		Postfix( root->right , 0 );
 		switch( root->kind ){
 			case plus	:	printf("+ "); 
-							fprintf(stack_file, "\tadd\n");
+							fprintf(stack_file, "add\n");
 							break;
 			case minus	:	printf("- "); 
-							fprintf(stack_file, "\tpush -1\n");
-							fprintf(stack_file, "\tmul\n");
-							fprintf(stack_file, "\tadd\n");
+							fprintf(stack_file, "push -1\n");
+							fprintf(stack_file, "mul\n");
+							fprintf(stack_file, "add\n");
 							break;
 			case times	:	printf("* "); 
-							fprintf(stack_file, "\tmul\n");
+							fprintf(stack_file, "mul\n");
 							break;
 			case divide :	printf("/ "); 
-							fprintf(stack_file, "\tdiv\n");
+							fprintf(stack_file, "div\n");
 							break;
 			case mod	:	printf("m "); break;
-							fprintf(stack_file, "\tmod\n");
+							fprintf(stack_file, "mod\n");
 			case number :	printf("%2d " , root->val );
-							fprintf(asm_file, "\tpush %d\n", root->val);
+							fprintf(stack_file, "push %d\n", root->val);
 							break;
 			case var	:	printf("%s " , root->name ); break;
 		}
 	}
-	if( start ) printf("\n");
+	if( start ){
+		printf("\n");
+		fprintf(stack_file, "pop\n");
+	}
 }
 
 static void Prefix( Node root , unsigned int start ){

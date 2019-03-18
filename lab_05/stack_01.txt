@@ -1,0 +1,13 @@
+push 12
+push 3
+mul
+push 2
+push 7
+add
+div
+push 5
+push 2
+push -1
+mul
+add
+pop
