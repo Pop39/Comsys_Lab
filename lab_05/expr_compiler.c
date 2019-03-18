@@ -15,6 +15,7 @@
 //#define _DEBUG_SIMPLIFY_
 
 static FILE *file;
+static FILE *asm_file;
 static int ch;
 static unsigned int val;
 char variable[50];
@@ -33,6 +34,8 @@ typedef struct NodeDesc{
 
 // Thid function will use together by using global variable please carefull to use that
 static void SInit( char* file_name ); // for inint file open by save file variable to FILE line7
+
+static void WInit( char* file_name ); // for init file open for write .asm file
 
 static void CopyString( char* target , char* origin );
 
@@ -65,7 +68,7 @@ int main( int argc , char** argv ){
 	Node node = ( Node ) malloc( sizeof( NodeDesc ) );
 	Node diff_node = ( Node ) malloc( sizeof( NodeDesc ) );
 	Node simplify_node = ( Node ) malloc( sizeof( NodeDesc ) );
-	if( argc == 2 ){
+	if( argc == 3 ){
 		SInit( argv[1] );
 		symbol = SGet();
 		Expression( &node );
@@ -86,6 +89,7 @@ int main( int argc , char** argv ){
 		#ifdef _NORMAL_DEBUG_
 			printf( "Finish Simplify\n"); 
 		#endif
+		WInit( argv[2] );
 		assert( symbol == eof );
 	}
 	else{
@@ -98,6 +102,11 @@ static void SInit( char* file_name ){
 	file = fopen( file_name , "r+t" ); // open text file for reading and writing
 	if( file != NULL ) ch = getc( file );
 	// function getc is get character from stream in this situation stream file is file variable
+}
+
+static void WInit( char* file_name ){
+	asm_file = fopen( file_name , "w" );
+	fprintf( asm_file , "")
 }
 
 static void Number(){
