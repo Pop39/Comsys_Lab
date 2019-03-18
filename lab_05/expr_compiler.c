@@ -76,19 +76,9 @@ int main( int argc , char** argv ){
 		Infix( node , 1 );
 
 		node = Simplify( node );
-		printf( "Simplify before diff : ");
+		printf( "Simplify : ");
 		Infix( node , 1 );
 
-		diff_node = Diff( node );
-		printf( "Differential : ");
-		Infix( diff_node , 1 ); 
-
-		simplify_node = Simplify( diff_node );
-		printf( "Simplify after diff : ");
-		Infix( simplify_node , 1 ); 
-		#ifdef _NORMAL_DEBUG_
-			printf( "Finish Simplify\n"); 
-		#endif
 		WInit( argv[2] );
 		assert( symbol == eof );
 	}
@@ -106,7 +96,9 @@ static void SInit( char* file_name ){
 
 static void WInit( char* file_name ){
 	asm_file = fopen( file_name , "w" );
-	fprintf( asm_file , "")
+	fprintf( asm_file , ".data\n");
+	fprintf( asm_file , ".text\n");
+	fprintf( asm_file , ".globl main\n");
 }
 
 static void Number(){
@@ -552,7 +544,11 @@ static Node Simplify( Node root ){
 						node = node->left;
 					  }
 					  break;
-		default		: assert( root->kind != mod );
+		case mod	: node->kind = root->kind;
+					  node->left = Simplify( root->left );
+					  node->right = Simplify( root->right );
+					  break;
+		default		: assert( 0 ); 
 	}
 	return node;
 }
