@@ -17,6 +17,7 @@ int main(){
     pthread_t thread;
     pthread_create(&thread , NULL , &task , NULL );
     global_number = 3;
+    printf("in main\n");
     task( NULL );
     global_number = 6;
     return 0;
