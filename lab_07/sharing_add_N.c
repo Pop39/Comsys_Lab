@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define N 2
+#define N 10
 void *thread(void *vargp);
 
 char **ptr; /* Global variable */ //line:conc:sharing:ptrdec
@@ -13,8 +13,16 @@ int main()
     int i;
     pthread_t tid;
     char *msgs[N] = {
-        "Hello from foo",
-        "Hello from bar"};
+        "Hello from 0"
+        ,"Hello from 1"
+        ,"Hello from 2"
+        ,"Hello from 3"
+        ,"Hello from 4"
+        ,"Hello from 5"
+        ,"Hello from 6"
+        ,"Hello from 7"
+        ,"Hello from 8"
+        ,"Hello from 9"};
 
     ptr = msgs;
     for (i = 0; i < N; i++)
