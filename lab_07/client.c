@@ -4,7 +4,6 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#include "common_threads.h"
 #include "sbuf.h"
 
 sbuf_t *shared_data;

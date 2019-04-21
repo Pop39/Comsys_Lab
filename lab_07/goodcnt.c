@@ -11,8 +11,6 @@
 #include <semaphore.h>
 #endif
 
-#include "common_threads.h"
-
 void *thread(void *vargp); /* Thread routine prototype */
 
 /* Global shared variables */
@@ -20,7 +18,7 @@ void *thread(void *vargp); /* Thread routine prototype */
 volatile long cnt = 0; /* Counter */
 
 #ifdef __APPLE__
-dispatch_semaphore_t mutex;          /* Semaphore that protects counter */
+dispatch_semaphore_t mutex;          /* semaphore that protects counter */
 #else
 sem_t mutex; 
 #endif
@@ -44,13 +42,13 @@ int main(int argc, char **argv)
     #ifdef __APPLE__
     mutex = dispatch_semaphore_create(1); // init with value of 1
     #else
-    Sem_init(&mutex, 0, 1); /* mutex = 1 */
+    sem_init(&mutex, 0, 1); /* mutex = 1 */
                             /* $end goodcntseminit */
     #endif
-    Pthread_create(&tid1, NULL, thread, &niters);
-    Pthread_create(&tid2, NULL, thread, &niters);
-    Pthread_join(tid1, NULL);
-    Pthread_join(tid2, NULL);
+    pthread_create(&tid1, NULL, thread, &niters);
+    pthread_create(&tid2, NULL, thread, &niters);
+    pthread_join(tid1, NULL);
+    pthread_join(tid2, NULL);
 
     /* Check result */
     if (cnt != (2 * niters))

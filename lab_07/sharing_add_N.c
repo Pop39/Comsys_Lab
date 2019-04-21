@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define N 10
+#define N 100
 void *thread(void *vargp);
 
 char **ptr; /* Global variable */ //line:conc:sharing:ptrdec
@@ -34,7 +34,7 @@ void *thread(void *vargp)
 {
     int myid = (int)vargp;
     static int cnt = 0;                                    //line:conc:sharing:cntdec
-    printf("[%d]: %s (cnt=%d)\n", myid, ptr[myid], ++cnt); //line:conc:sharing:stack
+    printf("[%d]: %s (cnt=%d)\n", myid, ptr[myid%10], ++cnt); //line:conc:sharing:stack
     return NULL;
 }
 /* $end sharing */

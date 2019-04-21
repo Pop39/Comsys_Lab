@@ -7,8 +7,6 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#include "common_threads.h"
-
 void *thread(void *vargp); /* Thread routine prototype */
 
 /* Global shared variable */
@@ -28,10 +26,10 @@ int main(int argc, char **argv)
     niters = atoi(argv[1]);
 
     /* Create threads and wait for them to finish */
-    Pthread_create(&tid1, NULL, thread, &niters);
-    Pthread_create(&tid2, NULL, thread, &niters);
-    Pthread_join(tid1, NULL);
-    Pthread_join(tid2, NULL);
+    pthread_create(&tid1, NULL, thread, &niters);
+    pthread_create(&tid2, NULL, thread, &niters);
+    pthread_join(tid1, NULL);
+    pthread_join(tid2, NULL);
 
     /* Check result */
     if (cnt != (2 * niters))

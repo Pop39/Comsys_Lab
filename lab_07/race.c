@@ -6,8 +6,6 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#include "common_threads.h"
-
 #define N 4
 
 void *thread(void *vargp);
@@ -19,9 +17,9 @@ int main()
     int i;
 
     for (i = 0; i < N; i++)
-        Pthread_create(&tid[i], NULL, thread, &i); //line:conc:race:createthread
+        pthread_create(&tid[i], NULL, thread, &i); //line:conc:race:createthread
     for (i = 0; i < N; i++)
-        Pthread_join(tid[i], NULL);
+        pthread_join(tid[i], NULL);
     exit(0);
 }
 

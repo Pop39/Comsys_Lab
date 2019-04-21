@@ -4,7 +4,6 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#include "common_threads.h"
 #include "sbuf.h"
 
 /* Create an empty, bounded, shared FIFO buffer with n slots */
