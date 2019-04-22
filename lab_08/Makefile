@@ -9,3 +9,6 @@ clean:
 
 simulate: simulate.c account.c account.h
 	gcc -I $(INCLUDES) -o simulate simulate.c account.c $(FLAGS)
+
+origin_simulate: origin_simulate.c account.c account.h
+	gcc -I $(INCLUDES) -o simulate simulate.c account.c $(FLAGS)
