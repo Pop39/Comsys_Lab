@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-
-#include "common_threads.h"
-#include "account.h"
+#include "origin_account.h"
 
 static struct timespec tim, tim2;
 

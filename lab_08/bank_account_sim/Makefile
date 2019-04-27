@@ -1,11 +1,6 @@
-
 FLAGS = -Wall -pthread
-INCLUDES = ./include
 
-all: simulate
+all: origin_simulate
 
-clean:
-	rm -f simulate *~
-
-simulate: simulate.c account.c account.h
-	gcc -I $(INCLUDES) -o simulate simulate.c account.c $(FLAGS)
+origin_simulate: origin_simulate.c origin_account.c origin_account.h
+	gcc -o origin_simulate origin_simulate.c origin_account.c $(FLAGS)
