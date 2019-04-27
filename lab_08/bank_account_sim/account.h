@@ -3,16 +3,13 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#define INT_BALANCE 400000000
-#define ROUND 400000000
+#define INT_BALANCE 40000
+#define ROUND 40000
 
 typedef struct {
   char name[31];
   int id;
   int balance;
-  sem_t go_lender; // piority to access go_edit for lender function
-  sem_t go_borrow; // piority to access go_edit for borrow function
-  sem_t go_edit; // get to critical section
 } account_info;
 
 void account_init(account_info *sp, int n);
