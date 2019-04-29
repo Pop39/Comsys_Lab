@@ -5,6 +5,9 @@
 
 #include "common_threads.h"
 
+// In reference : https://linux.die.net/man/3/pthread_mutex_lock
+//      
+
 int done = 0;
 pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t c = PTHREAD_COND_INITIALIZER;
