@@ -54,7 +54,7 @@ void* personB( void *arg );
 void* personC( void *arg );
 void* personD( void *arg );
 
-int main( int argc , char* argv )
+int main( int argc , char** argv )
 {
     pthread_mutex_init( &lock , 0 );
     pthread_cond_init( &firstOrder , 0 );
